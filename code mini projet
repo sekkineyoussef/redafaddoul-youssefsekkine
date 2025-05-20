@@ -1,0 +1,196 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct Produit {
+    int id;
+    char nom[50];
+    int quantite;
+    float prix;
+    struct Produit* suivant;
+} Produit;
+
+// Ajouter au début
+void ajouterDebut(Produit** tete, Produit nouveau) {
+    Produit* p = (Produit*) malloc(sizeof(Produit));
+    *p = nouveau;
+    p->suivant = *tete;
+    *tete = p;
+}
+
+// Ajouter à la fin
+void ajouterFin(Produit** tete, Produit nouveau) {
+    Produit* p = (Produit*) malloc(sizeof(Produit));
+    *p = nouveau;
+    p->suivant = NULL;
+
+    if (*tete == NULL) {
+        *tete = p;
+    } else {
+        Produit* temp = *tete;
+        while (temp->suivant != NULL) {
+            temp = temp->suivant;
+        }
+        temp->suivant = p;
+    }
+}
+
+// Afficher les produits
+void afficherProduits(Produit* tete) {
+    printf("\nID | Nom                  | Quantité | Prix\n");
+    printf("-----------------------------------------------\n");
+    while (tete != NULL) {
+        printf("%d | %-20s | %8d | %.2f MAD\n", tete->id, tete->nom, tete->quantite, tete->prix);
+        tete = tete->suivant;
+    }
+}
+
+// Rechercher un produit par ID
+Produit* rechercherProduit(Produit* tete, int id) {
+    while (tete != NULL) {
+        if (tete->id == id)
+            return tete;
+        tete = tete->suivant;
+    }
+    return NULL;
+}
+
+// Modifier un produit
+void modifierProduit(Produit* p) {
+    if (p == NULL) return;
+
+    printf("Nouveau nom : ");
+    // Clear input buffer before reading string
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF); 
+    scanf(" %[^\n]", p->nom); 
+    printf("Nouvelle quantité : ");
+    scanf("%d", &p->quantite);
+    printf("Nouveau prix : ");
+    scanf("%f", &p->prix);
+
+    printf("Produit modifié avec succès.\n");
+}
+
+// Supprimer un produit par ID
+void supprimerProduit(Produit** tete, int id) {
+    Produit* temp = *tete;
+    Produit* prec = NULL;
+
+    while (temp != NULL && temp->id != id) {
+        prec = temp;
+        temp = temp->suivant;
+    }
+
+    if (temp == NULL) {
+        printf("Produit non trouvé.\n");
+        return;
+    }
+
+    if (prec == NULL)
+        *tete = temp->suivant;
+    else
+        prec->suivant = temp->suivant;
+
+    free(temp);
+    printf("Produit supprimé avec succès.\n");
+}
+
+// Menu principal
+void menu(Produit** tete) {
+    int choix, id;
+    Produit nouveau;
+    Produit* p;
+
+    do {
+        printf("\n--- Menu Gestion Produits ---\n");
+        printf("1. Ajouter produit au début\n");
+        printf("2. Ajouter produit à la fin\n");
+        printf("3. Afficher produits\n");
+        printf("4. Rechercher produit\n");
+        printf("5. Modifier produit\n");
+        printf("6. Supprimer produit\n");
+        printf("7. Quitter\n");
+        printf("Votre choix : ");
+        scanf("%d", &choix);
+
+        // Consume the leftover newline character after reading the integer choice
+        int c;
+        while ((c = getchar()) != '\n' && c != EOF);
+
+        switch(choix) {
+            case 1:
+                printf("ID : ");
+                scanf("%d", &nouveau.id);
+                while ((c = getchar()) != '\n' && c != EOF); // Consume newline
+                printf("Nom : ");
+                scanf(" %[^\n]", nouveau.nom);
+                printf("Quantité : ");
+                scanf("%d", &nouveau.quantite);
+                while ((c = getchar()) != '\n' && c != EOF); // Consume newline
+                printf("Prix : ");
+                scanf("%f", &nouveau.prix);
+                while ((c = getchar()) != '\n' && c != EOF); // Consume newline
+                ajouterDebut(tete, nouveau);
+                break;
+            case 2:
+                printf("ID : ");
+                scanf("%d", &nouveau.id);
+                while ((c = getchar()) != '\n' && c != EOF); // Consume newline
+                printf("Nom : ");
+                scanf(" %[^\n]", nouveau.nom);
+                printf("Quantité : ");
+                scanf("%d", &nouveau.quantite);
+                while ((c = getchar()) != '\n' && c != EOF); // Consume newline
+                printf("Prix : ");
+                scanf("%f", &nouveau.prix);
+                while ((c = getchar()) != '\n' && c != EOF); // Consume newline
+                ajouterFin(tete, nouveau);
+                break;
+            case 3:
+                afficherProduits(*tete);
+                break;
+            case 4:
+                printf("ID à rechercher : ");
+                scanf("%d", &id);
+                // Consume newline after reading id
+                while ((c = getchar()) != '\n' && c != EOF);
+                p = rechercherProduit(*tete, id);
+                if (p)
+                    printf("Produit trouvé : %s, %d, %.2f MAD\n", p->nom, p->quantite, p->prix);
+                else
+                    printf("Produit non trouvé.\n");
+                break;
+            case 5:
+                printf("ID à modifier : ");
+                scanf("%d", &id);
+                // Consume newline after reading id
+                while ((c = getchar()) != '\n' && c != EOF);
+                p = rechercherProduit(*tete, id);
+                if (p != NULL)
+                    modifierProduit(p);
+                else
+                    printf("Produit non trouvé.\n");
+                break;
+            case 6:
+                printf("ID à supprimer : ");
+                scanf("%d", &id);
+                // Consume newline after reading id
+                while ((c = getchar()) != '\n' && c != EOF);
+                supprimerProduit(tete, id);
+                break;
+            case 7:
+                printf("Au revoir !\n");
+                break;
+            default:
+                printf("Choix invalide.\n");
+        }
+    } while(choix != 7);
+}
+
+// Programme principal
+int main() {
+    Produit* tete = NULL;
+    menu(&tete);
+    return 0;
+}
